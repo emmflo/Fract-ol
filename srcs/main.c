@@ -49,9 +49,12 @@ void		update_keys(t_env *env)
 
 typedef struct	s_args
 {
+	t_img		*img;
 	t_env		*env;
 	t_rect_int	rect;
 	int		(*fractal)(t_rect_int, t_point_int, t_frac_params*);
+	int		done;
+	t_frac_params	*params;
 }		t_args;
 
 void		*exec_fractal(void *args)
@@ -59,7 +62,8 @@ void		*exec_fractal(void *args)
 	t_args	*a;
 
 	a = (t_args*)args;
-	calculate_fractal(a->env, a->rect, a->fractal);
+	calculate_fractal(a->img, a->params, a->rect, a->fractal);
+	a->done = 1;
 	return (NULL);
 }
 
@@ -100,15 +104,48 @@ void	update_menu(t_env *env)
 	}
 }
 
+void		img_copy(t_img *dest, t_img *src)
+{
+	int	i;
+
+	if (dest == NULL && src == NULL)
+		return ;
+	i = 0;
+	//printf("dest->width %d, src->width %d\n", dest->width, src->width);
+	//printf("dest->height %d, src->height %d\n", dest->height, src->height);
+	//printf("dest->bits_per_pixel %d, src->bits_per_pixel %d\n", *dest->bits_per_pixel, src->bits_per_pixel);
+	while (i < dest->width * dest->height * (*dest->bits_per_pixel / 8) &&
+		i < src->width * src->height * (*src->bits_per_pixel / 8))
+	{
+		dest->data[i] = src->data[i];
+		i++;
+	}
+}
+
 int		update(t_env *env)
 {
 	int		i;
+	int		j;
 	t_point_int	size;
 	pthread_t	threads[24];
-	t_args		*args;
+	static t_args	*args = NULL;
+	static int	next_frame = 1;
+	static t_img	*img;
+	static t_img	*full_fract;
 
-	if (!(args = (t_args*)malloc(sizeof(t_args) * 24)))
-		return (1);
+	if (args == NULL)
+	{
+		if (!(args = (t_args*)malloc(sizeof(t_args) * 24)))
+			return (1);
+		i=0;
+		img = g_new_img(env->win->mlx_ptr, env->win->size_x, env->win->size_y);
+		full_fract = g_new_img(env->win->mlx_ptr, env->win->size_x, env->win->size_y);
+		while (i < 24)
+		{
+			args[i].img = img;
+			i++;
+		}
+	}
 	size.x = env->win->size_x / 6;
 	size.y = env->win->size_y / 4;
 	update_keys(env);
@@ -117,6 +154,8 @@ int		update(t_env *env)
 		env->params->offset.x = env->offset_start.x + (env->drag_start.x - env->ui->mousex) * env->params->zoom.x;
 		env->params->offset.y = env->offset_start.y + (env->drag_start.y - env->ui->mousey) * env->params->zoom.y;
 	}
+	if (next_frame) {
+		printf("THREADING\n");
 	i = 0;
 	while (i < 24)
 	{
@@ -126,16 +165,32 @@ int		update(t_env *env)
 		args[i].rect.h = size.y;
 		args[i].env = env;
 		args[i].fractal = env->fractal;
+		args[i].done = 0;
+		if (!(args[i].params = (t_frac_params*)malloc(sizeof(t_frac_params))))
+			return (NULL);
+		ft_memcpy(args[i].params, env->params, sizeof(t_frac_params));
 		pthread_create(&threads[i], NULL, &exec_fractal, &args[i]);
 		//calculate_fractal(env->win, rect, env->params, &julia);
 		i++;
 	}
+	next_frame = 0;
+	}
 	i = 0;
+	j = 0;
 	while (i < 24)
 	{
-		pthread_join(threads[i], NULL);
+		j += args[i].done;
+		//printf("i%d j%d\n", i, j);
+		//pthread_join(threads[i], NULL);
 		i++;
 	}
+	if (j == 24)
+	{
+		printf("DONE\n");
+		next_frame = 1;
+		img_copy(full_fract, img);
+	}
+	img_copy(env->win->img_next, full_fract);
 	update_menu(env);
 	g_update(env->win);
 	g_render_delete_text_buffer(env->win);
@@ -158,6 +213,7 @@ t_env	*set_env()
 	env->params->zoom.y = 1;
 	env->params->max = 100;
 	env->params->power = 2;
+
 	key_set_default(&(env->keys));
 	env->menu = 0;
 	env->c_update = 1;
@@ -169,11 +225,17 @@ t_env	*set_env()
 int		init_win(t_env *env)
 {
 	void		*mlx_ptr;
+	t_rect_int	win_rect;
 
 	if (!(mlx_ptr = mlx_init()))
 		return (0);
 	if (!(env->win = g_new_window(mlx_ptr, 1000, 1000, "Fractol")))
 		return (0);
+	win_rect.x = 0;
+	win_rect.y = 0;
+	win_rect.w = 1000;
+	win_rect.h = 1000;
+	env->params->win_rect = win_rect;
 	return (1);
 }
 

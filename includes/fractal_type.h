@@ -8,6 +8,7 @@ typedef struct		s_frac_params
 	t_point	c;
 	int	power;
 	t_point	zoom;
+	t_rect_int	win_rect;
 }			t_frac_params;
 
 #endif
