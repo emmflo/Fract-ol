@@ -5,6 +5,8 @@ OBJLIST := \
 	mouse.o \
 	julia.o \
 	fractal.o \
+	init.o \
+	threading.o \
 	zoom.o
 LIBFTDIR := libft
 #MLXDIR := minilibx_macos

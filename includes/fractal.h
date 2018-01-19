@@ -10,5 +10,6 @@ int	julia(t_rect_int win, t_point_int pt, t_frac_params *params);
 int	mandelbroth(t_rect_int win, t_point_int pt, t_frac_params *params);
 int	mandelbroth3(t_rect_int win, t_point_int pt, t_frac_params *params);
 int	mandelbroth_power(t_rect_int win, t_point_int pt, t_frac_params *params);
+int	fract(t_rect_int win, t_point_int pt, t_frac_params *params);
 
 #endif

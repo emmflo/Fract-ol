@@ -2,8 +2,9 @@
 # define ENV_H
 # include "keyboard_type.h"
 # include "imgui.h"
-# include "fractal_type.h"
 # include <pthread.h>
+# include "threading_type.h"
+# include "fractal_type.h"
 
 typedef struct	s_env
 {
@@ -18,6 +19,10 @@ typedef struct	s_env
 	t_point_int	drag_start;
 	t_point		offset_start;
 	int		drag;
+	t_img		*img;
+	t_img		*full_fract;
+	struct s_args	*args;
+	int		next_frame;
 }				t_env;
 
 #endif

@@ -1,4 +1,5 @@
 #include "fractal.h"
+#include <complex.h>
 
 int	julia(t_rect_int win, t_point_int pt, t_frac_params *params)
 {
@@ -120,6 +121,55 @@ int	mandelbroth_power(t_rect_int win, t_point_int pt, t_frac_params *params)
 		v = complex_power(v, params->power);
 		v.x += v_copy.x;
 		v.y += v_copy.y;
+		i++;
+	}
+	return (i);
+}
+
+int	fract2(t_rect_int win, t_point_int pt, t_frac_params *params)
+{
+	t_point	v;
+	t_point	tmp;
+	int	i;
+
+	i = 0;
+	v.x = pt.x * params->zoom.x + params->offset.x;
+	v.y = pt.y * params->zoom.y + params->offset.y;
+	v.x = ((((double)(v.x - win.x) * 3.5) / (double)win.w) - 2.5);
+	v.y = ((((double)(v.y - win.y) * 2.0) / (double)win.h) - 1.0);
+	while (v.x*v.x + v.y*v.y < 4 && i < params->max)
+	{
+		tmp.x = v.x;
+		tmp.y = v.y;
+		v.x = (2*(-(tmp.x*tmp.x*tmp.x) + 3*tmp.x*tmp.y*tmp.y + 6))
+			/(3*(-(tmp.x*tmp.x) + 2*tmp.x + tmp.y*tmp.y)*(-(tmp.x*tmp.x) + 2*tmp.x + tmp.y*tmp.y));
+		v.y = (2*(-3*(tmp.x*tmp.x*tmp.y) + tmp.y*tmp.y*tmp.y))
+			/(3*(-2*(tmp.x*tmp.y) + 2*tmp.y)*(-2*(tmp.x*tmp.y) + 2*tmp.y));
+		v.x += params->c.x;
+		v.y += params->c.y;
+		i++;
+	}
+	return (i);
+}
+
+int	fract(t_rect_int win, t_point_int pt, t_frac_params *params)
+{
+	double complex	z;
+	double complex	c;
+	t_point	v;
+	t_point	tmp;
+	int	i;
+
+	i = 0;
+	v.x = pt.x * params->zoom.x + params->offset.x;
+	v.y = pt.y * params->zoom.y + params->offset.y;
+	v.x = ((((double)(v.x - win.x) * 3.5) / (double)win.w) - 2.5);
+	v.y = ((((double)(v.y - win.y) * 2.0) / (double)win.h) - 1.0);
+	z = v.x + v.y * I;
+	c = params->c.x + params->c.y * I;
+	while (cabs(z) < 2 && i < params->max)
+	{
+		z = ((1 - cpow(z, 3) / 6)/cpow((z - cpow(z, 2) / 2), 2)) + c;
 		i++;
 	}
 	return (i);
