@@ -6,7 +6,7 @@
 #  include <X11/keysym.h>
 # endif
 
-enum {menu, quit, up, down, left, right, zoom, dezoom, c_update};
+enum {menu, quit, up, down, left, right, zoom, dezoom, c_update, angle_up, angle_down};
 
 # include "env.h"
 

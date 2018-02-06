@@ -45,7 +45,7 @@ int		mouse_press_button(int button, int x, int y, t_env *env)
 	{
 		mouse.x = x;
 		mouse.y = y;
-		zoom_centered(env, mouse, 0.98);
+		zoom_centered(env, mouse, 1.02);
 	}
 	return (0);
 }

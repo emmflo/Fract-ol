@@ -1,6 +1,6 @@
 #ifndef KEYBOARD_TYPE_H
 # define KEYBOARD_TYPE_H
-# define NB_ACT 9
+# define NB_ACT 11 
 
 typedef struct	s_keys
 {

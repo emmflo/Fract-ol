@@ -50,6 +50,8 @@ void	key_set_default(t_keys *keys)
 	keys->act_key[zoom] = XK_q;
 	keys->act_key[dezoom] = XK_e;
 	keys->act_key[c_update] = XK_r;
+	keys->act_key[angle_up] = XK_Up;
+	keys->act_key[angle_down] = XK_Down;
 }
 
 void	key_last_act_update(t_env *env)
